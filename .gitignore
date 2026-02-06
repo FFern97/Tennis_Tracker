@@ -1,0 +1,19 @@
+# Bytecode
+__pycache__/
+
+# Entorno virtual
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Salidas de video
+output_videos/
+
+# Archivos pesados (límite 100MB de GitHub)
+*.pt
+*.mp4
+*.avi

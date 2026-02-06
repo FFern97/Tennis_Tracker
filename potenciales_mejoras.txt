@@ -1,0 +1,50 @@
+# Sugerencias y Posibles Mejoras - Tennis Analysis Project
+
+## Detección de Pelota 🎾
+
+* **Ajustar Umbral de Confianza (`BALL_CONFIDENCE`):**
+    * **Sugerencia:** Bajar ligeramente el valor (ej., a `0.20` o `0.15`) podría ayudar a capturar detecciones un poco más débiles si la pelota se pierde a veces.
+    * **Riesgo:** Podrían aparecer más falsos positivos (detectar cosas que no son la pelota).
+    * **Estado:** Pendiente de probar.
+
+* **Implementar Seguimiento (Tracking) para la Pelota:**
+    * **Sugerencia:** Usar `ball_model.track()` en lugar de `ball_model.predict()`. Esto podría ayudar a mantener la detección durante breves momentos en que la confianza baja o hay oclusiones leves.
+    * **Riesgo:** El seguimiento de objetos tan pequeños y rápidos es inherentemente difícil; podría no ser estable o generar ID swaps.
+    * **Estado:** Pendiente de probar.
+
+## Detección/Seguimiento de Jugadores 🧍
+
+* **(Resuelto por ahora)** **Cambio de ID por Ángulo de Cámara:** Se observó cambio de ID al cambiar el ángulo. Se decidió no abordar por ahora, asumiendo grabación desde ángulo fijo.
+    * **Posible Mejora Futura:** Probar tracker `bytetrack.yaml` o investigar Re-identificación si se necesita robustez ante cambios de cámara.
+
+## Detección de la Cancha (Líneas/Puntos Clave) 📍
+
+* **Enfoque Actual:** Usar modelo de Puntos Clave (Keypoints) tipo ResNet (Pendiente de implementar).
+* **Enfoque Anterior (Hough):** Se lograron buenos resultados con Canny (20/70, Gauss 3x3, Cierre 5x5) + Máscara ROI + HoughP (70, 80, 10), pero el enfoque de Keypoints puede ser más robusto para la geometría.
+
+## Filtrado / Lógica General 🧠
+
+* **(Pendiente)** **Filtrado de Jugadores:** Implementar lógica para usar los puntos clave de la cancha (una vez detectados) para filtrar y quedarse solo con los 2 jugadores activos, descartando otras personas detectadas (jueces, público, etc.).
+
+## Optimización ⚡
+
+* **(Implementado Parcialmente)** **Guardado de Resultados Intermedios:** Se implementó guardado/carga de ROIs en JSON.
+    * **Posible Mejora:** Implementar guardado/carga de detecciones/seguimientos (jugadores, pelota) por fotograma usando archivos `pickle` para acelerar pruebas de lógica posterior, como se vio en el video tutorial.
+
+## Otros / Ideas Futuras ✨
+
+* **(Pendiente)** **Análisis de Golpes:** Objetivo final del proyecto. Requerirá analizar la pose del jugador, la posición de la pelota y la raqueta.
+* **(Pendiente)** **Estimación de Pose:** Usar modelos específicos (como YOLOv8-Pose) para detectar la pose de los jugadores y ayudar en el análisis de golpes.
+* **(Opcional)** **Calibración de Cámara / Mapeo 3D:** Para obtener métricas más precisas (velocidad de la pelota, distancia recorrida por jugadores) si se desea ir más allá de la detección 2D.
+
+
+## Detección de la Cancha (Alternativa Futura) 🧐
+
+* **Proyecto CourtCheck (AggieSportsAnalytics):**
+    * **Enlace:** https://github.com/AggieSportsAnalytics/CourtCheck
+    * **Descripción:** Es un sistema más completo de análisis de tenis de extremo a extremo.
+    * **Técnica para la Cancha:** Utiliza **Detectron2 (Keypoint R-CNN)**, un framework potente para la detección de puntos clave.
+    * **Otros Componentes:** Incluye módulos separados para detección de jugadores (Faster R-CNN), seguimiento de pelota (CNN tipo TrackNet) y detección de botes (CatBoost).
+    * **Consideraciones:** La integración podría ser más compleja debido a la estructura del proyecto y las dependencias (como Detectron2). Obtener los pesos pre-entrenados específicos para la cancha podría requerir investigar más el repositorio.
+    * **Potencial:** Podría ofrecer una detección de puntos clave muy robusta si se logra integrar. A considerar si el enfoque actual (ResNet/TrackNet de `yastrebksv`) presenta limitaciones.
+    * **Estado:** Guardado como alternativa.
