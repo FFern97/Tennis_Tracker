@@ -38,11 +38,6 @@ CONFIG = {
     # Visualización
     'SHOW_MINIMAP': True,
     
-    # Configuración de interpolación de pelota
-    'BALL_BUFFER_SIZE': 10,  # Tamaño del buffer para gap filling (esperar detección B)
-    'BALL_SMOOTHING_WINDOW': 3,  # Ventana para moving average (últimas N posiciones)
-    'MAX_INTERPOLATION_FRAMES': 10,  # Máximo de frames en un gap para aplicar gap filling bidireccional
-    
     # Configuración de interpolación de personas
     'PERSON_MAX_INTERPOLATION_FRAMES': 15,  # Máximo de frames sin detección para interpolar
 }
@@ -110,11 +105,7 @@ if __name__ == "__main__":
     inv_homography = None
 
     # Inicializar trackers
-    ball_tracker = BallTracker(
-        buffer_size=CONFIG['BALL_BUFFER_SIZE'],
-        smoothing_window=CONFIG['BALL_SMOOTHING_WINDOW'],
-        max_interpolation_frames=CONFIG['MAX_INTERPOLATION_FRAMES']
-    )
+    ball_tracker = BallTracker()
     
     person_tracker = PersonTracker(
         max_interpolation_frames=CONFIG['PERSON_MAX_INTERPOLATION_FRAMES']

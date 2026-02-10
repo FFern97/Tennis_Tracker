@@ -1,36 +1,42 @@
 """
 Trackers de pelota y jugadores. Usan esquemas de schema.py.
-Lógica simplificada: prioridad absoluta a YOLO, interpolación lineal básica.
+BallTracker: EPI (Extrapolación por Promedio de Inercia). Real-time, sin buffer.
 """
 import cv2
 import numpy as np
+from collections import deque
 
 from schema import Detection, PlayerDetection, BallInfo, PlayersInfo
 import config
 
+# EPI 2.0: reentry_alpha y tamaño de historial (el resto en config)
+BALL_VELOCITY_HISTORY_SIZE = 5
+TRAJECTORY_HISTORY_SIZE = 10
+
 
 class BallTracker:
     """
-    Rastrea la pelota con interpolación conservadora (gap filling) y suavizado por media móvil.
-    Prioridad absoluta a detecciones YOLO con conf > config.BALL_CONFIDENCE.
-    Interpolación lineal simple de A a B cuando hay gap.
+    Rastrea la pelota con EPI 2.0 (Extrapolación por Promedio de Inercia).
+    Damping acumulativo por frame de gap, max 5 frames sin detección (luego None),
+    reentrada conservadora (alpha 0.8), safety check para velocidades altas (saque).
     """
 
-    def __init__(self, buffer_size=10, smoothing_window=3, max_interpolation_frames=10):
+    def __init__(self, velocity_history_size=5, reentry_alpha=None):
         """
         Args:
-            buffer_size: Tamaño del buffer para gap filling (esperar detección B).
-            smoothing_window: Ventana para moving average (últimas N posiciones).
-            max_interpolation_frames: Máximo de frames en un gap para aplicar gap filling bidireccional.
+            velocity_history_size: Cantidad de vectores de velocidad a guardar (deque circular).
+            reentry_alpha: Mezcla al reaparecer la pelota (primer frame tras gap). Por defecto config.BALL_REENTRY_ALPHA.
         """
-        self.buffer_size = buffer_size
-        self.smoothing_window = smoothing_window
-        self.max_interpolation_frames = max_interpolation_frames
-        self.detection_history = []
+        self.velocity_history_size = velocity_history_size
+        self.reentry_alpha = (
+            config.BALL_REENTRY_ALPHA if reentry_alpha is None else reentry_alpha
+        )
+        self.velocity_deque = deque(maxlen=velocity_history_size)
+        self.last_position = None
+        self.last_frame = None
+        self.last_detection_frame = None  # Último frame con detección real YOLO (para max gap)
         self.trajectory_history = []
-        self.gap_buffer = []
-        self.last_detected_position = None
-        self.last_detected_frame = None
+        self.last_was_extrapolated = False
 
     def update(
         self,
@@ -40,19 +46,9 @@ class BallTracker:
         frame_height=None,
     ):
         """
-        Actualiza el tracker con las detecciones de pelota (esquema Detection).
-        Prioridad absoluta a YOLO: usa la primera detección con conf > config.BALL_CONFIDENCE.
-
-        Args:
-            frame_number: Número del frame actual.
-            ball_detections: Lista de Detection (schema). Se usa la primera con conf > config.BALL_CONFIDENCE.
-            inv_homography: No usado; se mantiene por compatibilidad.
-            frame_height: No usado; se mantiene por compatibilidad.
-
-        Returns:
-            BallInfo: position, is_interpolated, trajectory_history.
+        EPI 2.0: damping acumulativo (damping^gap_frames), max 5 frames luego None,
+        reentrada alpha 0.8, safety check si velocidad > BALL_VELOCITY_MAX_PX al entrar en gap.
         """
-        # PRIORIDAD ABSOLUTA A YOLO: usar detección si conf > config.BALL_CONFIDENCE
         detected_position = None
         for d in ball_detections:
             if isinstance(d, Detection) and d.conf > config.BALL_CONFIDENCE:
@@ -60,151 +56,95 @@ class BallTracker:
                 break
 
         if detected_position is not None:
-            # Si había un gap en el buffer, hacer gap filling bidireccional
-            if len(self.gap_buffer) > 0 and self.last_detected_position is not None:
-                self._fill_gap_backward(frame_number, detected_position)
+            real_x, real_y = detected_position
+            if self.last_position is not None:
+                vx = real_x - self.last_position[0]
+                vy = real_y - self.last_position[1]
+                self.velocity_deque.append((vx, vy))
+                if self.last_was_extrapolated and len(self.velocity_deque) > 0:
+                    avg_vx = float(np.mean([v[0] for v in self.velocity_deque]))
+                    avg_vy = float(np.mean([v[1] for v in self.velocity_deque]))
+                    pred_x = self.last_position[0] + avg_vx
+                    pred_y = self.last_position[1] + avg_vy
+                    out_x = self.reentry_alpha * real_x + (1 - self.reentry_alpha) * pred_x
+                    out_y = self.reentry_alpha * real_y + (1 - self.reentry_alpha) * pred_y
+                    position = (out_x, out_y)
+                else:
+                    position = (real_x, real_y)
+            else:
+                position = (real_x, real_y)
 
-            # Aplicar suavizado con moving average
-            smoothed_position = self._apply_smoothing(detected_position)
-
-            # Agregar al historial
-            self.detection_history.append(
-                (frame_number, smoothed_position[0], smoothed_position[1], False)
-            )
-            self.trajectory_history.append(
-                (frame_number, smoothed_position[0], smoothed_position[1])
-            )
-
-            # Mantener límites del historial
-            if len(self.detection_history) > self.buffer_size:
-                self.detection_history.pop(0)
-            if len(self.trajectory_history) > 10:
-                self.trajectory_history.pop(0)
-
-            # Actualizar última detección y limpiar buffer
-            self.last_detected_position = smoothed_position
-            self.last_detected_frame = frame_number
-            self.gap_buffer = []
-
+            self.last_position = (real_x, real_y)
+            self.last_frame = frame_number
+            self.last_detection_frame = frame_number
+            self.last_was_extrapolated = False
+            self._append_trajectory(frame_number, position)
             return BallInfo(
-                position=smoothed_position,
+                position=position,
                 is_interpolated=False,
                 trajectory_history=self.get_trajectory_history(),
             )
 
-        # Si no hay detección, agregar al buffer de gap (NO interpolar hacia adelante)
-        if self.last_detected_position is not None:
-            self.gap_buffer.append(frame_number)
+        if self.last_position is None:
+            return BallInfo(
+                position=None,
+                is_interpolated=False,
+                trajectory_history=self.get_trajectory_history(),
+            )
 
-            # Si el buffer es muy grande, descartar
-            if len(self.gap_buffer) > self.buffer_size:
-                print(
-                    f"[BallTracker] Frame {frame_number}: Buffer de gap excedido, descartando gap"
-                )
-                self.gap_buffer = []
-                self.last_detected_position = None
-                return BallInfo(
-                    position=None,
-                    is_interpolated=False,
-                    trajectory_history=self.get_trajectory_history(),
-                )
+        gap_frames = (
+            frame_number - self.last_detection_frame
+            if self.last_detection_frame is not None
+            else 0
+        )
+        if gap_frames > config.MAX_PREDICTION_FRAMES:
+            self.velocity_deque.clear()
+            return BallInfo(
+                position=None,
+                is_interpolated=False,
+                trajectory_history=self.get_trajectory_history(),
+            )
 
-        # No hay detección y no hay historial suficiente
+        if len(self.velocity_deque) == 0:
+            position = self.last_position
+        else:
+            damping = config.BALL_VELOCITY_DAMPING
+            avg_vx = float(np.mean([v[0] for v in self.velocity_deque]))
+            avg_vy = float(np.mean([v[1] for v in self.velocity_deque]))
+            # Safety: si la velocidad es muy alta (ej. saque), limitar para no cruzar la pantalla en 2 frames
+            max_px = config.BALL_VELOCITY_MAX_PX
+            mag = np.hypot(avg_vx, avg_vy)
+            if mag > max_px and mag > 1e-6:
+                scale = max_px / mag
+                avg_vx *= scale
+                avg_vy *= scale
+            # Damping acumulativo: cada frame de gap pierde más velocidad
+            damping_factor = damping ** gap_frames
+            avg_vx *= damping_factor
+            avg_vy *= damping_factor
+            position = (
+                self.last_position[0] + avg_vx,
+                self.last_position[1] + avg_vy,
+            )
+
+        self.last_position = position
+        self.last_frame = frame_number
+        self.last_was_extrapolated = True
+        self._append_trajectory(frame_number, position)
         return BallInfo(
-            position=None,
-            is_interpolated=False,
+            position=position,
+            is_interpolated=True,
             trajectory_history=self.get_trajectory_history(),
         )
 
-    def _apply_smoothing(self, current_position):
-        """
-        Media móvil sobre las últimas N posiciones detectadas (no interpoladas).
-        Fórmula: avg_x = mean(x_i), avg_y = mean(y_i) para i en ventana.
-        """
-        if len(self.detection_history) < self.smoothing_window:
-            return current_position
-
-        # Obtener últimas N posiciones detectadas (no interpoladas)
-        recent_positions = []
-        for entry in self.detection_history[-self.smoothing_window :]:
-            _, x, y, is_interp = entry
-            if not is_interp:
-                recent_positions.append((x, y))
-
-        # Si no hay suficientes posiciones detectadas, retornar actual sin suavizar
-        if len(recent_positions) < 2:
-            return current_position
-
-        # Agregar posición actual
-        recent_positions.append(current_position)
-
-        # Calcular promedio
-        avg_x = np.mean([p[0] for p in recent_positions])
-        avg_y = np.mean([p[1] for p in recent_positions])
-
-        return (avg_x, avg_y)
-
-    def _fill_gap_backward(self, end_frame, end_position):
-        """
-        Rellena un gap hacia atrás cuando tenemos detección A (última) y detección B (actual).
-        Interpolación lineal simple: p(t) = start + (end - start) * t, t in [0,1].
-        """
-        if len(self.gap_buffer) == 0 or self.last_detected_position is None:
-            return
-
-        start_frame = self.last_detected_frame
-        start_position = self.last_detected_position
-        start_x, start_y = start_position
-        end_x, end_y = end_position
-
-        gap_size = end_frame - start_frame
-        if gap_size <= 1:
-            return
-
-        # Limitar el gap al máximo permitido
-        if gap_size > self.max_interpolation_frames:
-            print(
-                f"[BallTracker] Frame {end_frame}: Gap de {gap_size} frames excede el máximo ({self.max_interpolation_frames}), limitando"
-            )
-            gap_size = self.max_interpolation_frames
-            start_frame = end_frame - gap_size
-
-        print(f"[BallTracker] Frame {end_frame}: Interpolando gap de {gap_size} frames")
-
-        # Interpolación lineal simple entre start y end
-        for i in range(1, gap_size):
-            frame_num = start_frame + i
-            t = i / gap_size  # Parámetro [0, 1]
-
-            # Interpolación lineal
-            x = start_x + (end_x - start_x) * t
-            y = start_y + (end_y - start_y) * t
-
-            # Insertar en el historial en orden cronológico
-            inserted = False
-            for idx, entry in enumerate(self.detection_history):
-                if entry[0] > frame_num:
-                    self.detection_history.insert(idx, (frame_num, x, y, True))
-                    inserted = True
-                    break
-            if not inserted:
-                self.detection_history.append((frame_num, x, y, True))
-
-            # Agregar a trajectory_history
-            self.trajectory_history.append((frame_num, x, y))
-
-            # Mantener límites
-            if len(self.detection_history) > self.buffer_size:
-                self.detection_history.pop(0)
-            if len(self.trajectory_history) > 10:
-                self.trajectory_history.pop(0)
+    def _append_trajectory(self, frame_number: int, position: tuple):
+        self.trajectory_history.append((frame_number, position[0], position[1]))
+        while len(self.trajectory_history) > TRAJECTORY_HISTORY_SIZE:
+            self.trajectory_history.pop(0)
 
     def get_last_position(self):
         """Última posición conocida (x, y) o None."""
-        if self.detection_history:
-            _, x, y, _ = self.detection_history[-1]
-            return (x, y)
-        return None
+        return self.last_position
 
     def get_trajectory_history(self):
         """Copia del historial de trayectoria para estela (últimos 10)."""

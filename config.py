@@ -31,10 +31,11 @@ N_FRAMES_TO_AVERAGE = 5
 # --- Visualización ---
 SHOW_MINIMAP = True
 
-# --- Configuración de interpolación de pelota ---
-BALL_BUFFER_SIZE = 10  # Tamaño del buffer para gap filling (esperar detección B)
-BALL_SMOOTHING_WINDOW = 3  # Ventana para moving average (últimas N posiciones)
-MAX_INTERPOLATION_FRAMES = 10  # Máximo de frames en un gap para gap filling bidireccional
+# --- EPI 2.0 (pelota) ---
+BALL_VELOCITY_DAMPING = 0.75  # Factor acumulativo por frame de gap (velocidad decae rápido)
+MAX_PREDICTION_FRAMES = 5  # Máximo de frames sin detección YOLO; si se supera, posición estrictamente None
+BALL_REENTRY_ALPHA = 0.8  # Peso a la detección real en reentrada (snap rápido a trayectoria corregida)
+BALL_VELOCITY_MAX_PX = 80  # Límite de velocidad (px/frame) al entrar en gap; si se supera se aplica damping de seguridad
 
 # --- Configuración de interpolación de personas ---
 PERSON_MAX_INTERPOLATION_FRAMES = 15  # Máximo de frames sin detección para interpolar

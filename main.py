@@ -106,11 +106,7 @@ def main():
     )
 
     # Trackers
-    ball_tracker = BallTracker(
-        buffer_size=config.BALL_BUFFER_SIZE,
-        smoothing_window=config.BALL_SMOOTHING_WINDOW,
-        max_interpolation_frames=config.MAX_INTERPOLATION_FRAMES,
-    )
+    ball_tracker = BallTracker()
     person_tracker = PersonTracker(max_interpolation_frames=config.PERSON_MAX_INTERPOLATION_FRAMES)
 
     # Video
