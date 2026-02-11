@@ -31,11 +31,8 @@ N_FRAMES_TO_AVERAGE = 5
 # --- Visualización ---
 SHOW_MINIMAP = True
 
-# --- EPI 2.0 (pelota) ---
-BALL_VELOCITY_DAMPING = 0.75  # Factor acumulativo por frame de gap (velocidad decae rápido)
-MAX_PREDICTION_FRAMES = 5  # Máximo de frames sin detección YOLO; si se supera, posición estrictamente None
-BALL_REENTRY_ALPHA = 0.8  # Peso a la detección real en reentrada (snap rápido a trayectoria corregida)
-BALL_VELOCITY_MAX_PX = 80  # Límite de velocidad (px/frame) al entrar en gap; si se supera se aplica damping de seguridad
+# --- Detección localizada de pelota ---
+BALL_ROI_SIZE = 320  # Tamaño del ROI (región de interés) para detección localizada de pelota
 
 # --- Configuración de interpolación de personas ---
 PERSON_MAX_INTERPOLATION_FRAMES = 15  # Máximo de frames sin detección para interpolar

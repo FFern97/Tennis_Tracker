@@ -133,8 +133,19 @@ def main():
         if frame_count % 30 == 0:
             print(f"Frame {frame_count}...")
 
-        # Inferencia estructurada
-        detections: FrameData = engine.predict(frame)
+        # Jerarquía de detección: Global -> Localizado (ROI/SAHI) -> Pure Vision (sin extrapolación)
+        # Paso 1: Intentar detección global
+        detections: FrameData = engine.predict_global(frame)
+        
+        # Paso 2: Si la detección global falla y existe una última posición, intentar detección localizada
+        if not detections.ball:
+            last_position = ball_tracker.get_last_position()
+            if last_position is not None:
+                localized_ball_detections = engine.predict_localized(frame, last_position)
+                if localized_ball_detections:
+                    detections.ball = localized_ball_detections
+        
+        # Paso 3: Si ambas detecciones fallan, ball_tracker retornará posición None (Pure Vision)
 
         # Homografía de cancha (solo actualiza cuando se completa el promediado)
         sk, hm, inv = _setup_court_and_homography(

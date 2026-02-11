@@ -1,42 +1,28 @@
 """
 Trackers de pelota y jugadores. Usan esquemas de schema.py.
-BallTracker: EPI (Extrapolación por Promedio de Inercia). Real-time, sin buffer.
+BallTracker: Pure Vision - sin extrapolación, solo detección directa.
 """
 import cv2
 import numpy as np
-from collections import deque
 
 from schema import Detection, PlayerDetection, BallInfo, PlayersInfo
 import config
 
-# EPI 2.0: reentry_alpha y tamaño de historial (el resto en config)
-BALL_VELOCITY_HISTORY_SIZE = 5
 TRAJECTORY_HISTORY_SIZE = 10
 
 
 class BallTracker:
     """
-    Rastrea la pelota con EPI 2.0 (Extrapolación por Promedio de Inercia).
-    Damping acumulativo por frame de gap, max 5 frames sin detección (luego None),
-    reentrada conservadora (alpha 0.8), safety check para velocidades altas (saque).
+    Rastrea la pelota con enfoque Pure Vision.
+    Sin extrapolación: si no hay detección, la posición es None.
+    Mantiene last_position únicamente para referencia al ROI de inferencia localizada.
     """
 
-    def __init__(self, velocity_history_size=5, reentry_alpha=None):
-        """
-        Args:
-            velocity_history_size: Cantidad de vectores de velocidad a guardar (deque circular).
-            reentry_alpha: Mezcla al reaparecer la pelota (primer frame tras gap). Por defecto config.BALL_REENTRY_ALPHA.
-        """
-        self.velocity_history_size = velocity_history_size
-        self.reentry_alpha = (
-            config.BALL_REENTRY_ALPHA if reentry_alpha is None else reentry_alpha
-        )
-        self.velocity_deque = deque(maxlen=velocity_history_size)
+    def __init__(self):
+        """Inicializa el tracker sin lógica de extrapolación."""
         self.last_position = None
         self.last_frame = None
-        self.last_detection_frame = None  # Último frame con detección real YOLO (para max gap)
         self.trajectory_history = []
-        self.last_was_extrapolated = False
 
     def update(
         self,
@@ -46,8 +32,8 @@ class BallTracker:
         frame_height=None,
     ):
         """
-        EPI 2.0: damping acumulativo (damping^gap_frames), max 5 frames luego None,
-        reentrada alpha 0.8, safety check si velocidad > BALL_VELOCITY_MAX_PX al entrar en gap.
+        Pure Vision: solo procesa detecciones directas.
+        Si ball_detections está vacío, la posición es None.
         """
         detected_position = None
         for d in ball_detections:
@@ -56,86 +42,27 @@ class BallTracker:
                 break
 
         if detected_position is not None:
+            # Detección encontrada: actualizar posición
             real_x, real_y = detected_position
-            if self.last_position is not None:
-                vx = real_x - self.last_position[0]
-                vy = real_y - self.last_position[1]
-                self.velocity_deque.append((vx, vy))
-                if self.last_was_extrapolated and len(self.velocity_deque) > 0:
-                    avg_vx = float(np.mean([v[0] for v in self.velocity_deque]))
-                    avg_vy = float(np.mean([v[1] for v in self.velocity_deque]))
-                    pred_x = self.last_position[0] + avg_vx
-                    pred_y = self.last_position[1] + avg_vy
-                    out_x = self.reentry_alpha * real_x + (1 - self.reentry_alpha) * pred_x
-                    out_y = self.reentry_alpha * real_y + (1 - self.reentry_alpha) * pred_y
-                    position = (out_x, out_y)
-                else:
-                    position = (real_x, real_y)
-            else:
-                position = (real_x, real_y)
-
+            position = (real_x, real_y)
+            
             self.last_position = (real_x, real_y)
             self.last_frame = frame_number
-            self.last_detection_frame = frame_number
-            self.last_was_extrapolated = False
             self._append_trajectory(frame_number, position)
+            
             return BallInfo(
                 position=position,
                 is_interpolated=False,
                 trajectory_history=self.get_trajectory_history(),
             )
-
-        if self.last_position is None:
-            return BallInfo(
-                position=None,
-                is_interpolated=False,
-                trajectory_history=self.get_trajectory_history(),
-            )
-
-        gap_frames = (
-            frame_number - self.last_detection_frame
-            if self.last_detection_frame is not None
-            else 0
-        )
-        if gap_frames > config.MAX_PREDICTION_FRAMES:
-            self.velocity_deque.clear()
-            return BallInfo(
-                position=None,
-                is_interpolated=False,
-                trajectory_history=self.get_trajectory_history(),
-            )
-
-        if len(self.velocity_deque) == 0:
-            position = self.last_position
         else:
-            damping = config.BALL_VELOCITY_DAMPING
-            avg_vx = float(np.mean([v[0] for v in self.velocity_deque]))
-            avg_vy = float(np.mean([v[1] for v in self.velocity_deque]))
-            # Safety: si la velocidad es muy alta (ej. saque), limitar para no cruzar la pantalla en 2 frames
-            max_px = config.BALL_VELOCITY_MAX_PX
-            mag = np.hypot(avg_vx, avg_vy)
-            if mag > max_px and mag > 1e-6:
-                scale = max_px / mag
-                avg_vx *= scale
-                avg_vy *= scale
-            # Damping acumulativo: cada frame de gap pierde más velocidad
-            damping_factor = damping ** gap_frames
-            avg_vx *= damping_factor
-            avg_vy *= damping_factor
-            position = (
-                self.last_position[0] + avg_vx,
-                self.last_position[1] + avg_vy,
+            # Sin detección: posición es None
+            # Mantener last_position para referencia al ROI (no se actualiza)
+            return BallInfo(
+                position=None,
+                is_interpolated=False,
+                trajectory_history=self.get_trajectory_history(),
             )
-
-        self.last_position = position
-        self.last_frame = frame_number
-        self.last_was_extrapolated = True
-        self._append_trajectory(frame_number, position)
-        return BallInfo(
-            position=position,
-            is_interpolated=True,
-            trajectory_history=self.get_trajectory_history(),
-        )
 
     def _append_trajectory(self, frame_number: int, position: tuple):
         self.trajectory_history.append((frame_number, position[0], position[1]))
