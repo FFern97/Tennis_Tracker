@@ -9,7 +9,7 @@ BALL_MODEL_PATH = "models/best.pt"
 KEYPOINT_MODEL_PATH = "models/model_tennis_court_det.pt"
 
 # --- Rutas de video (relativas al proyecto) ---
-VIDEO_IN_PATH = "data/videos/test_video2.mp4"
+VIDEO_IN_PATH = "data/videos/test_video1.mp4"
 VIDEO_OUT_FOLDER = "output_videos"
 VIDEO_OUT_BASENAME = "output_tracking"
 VIDEO_OUT_EXTENSION = ".mp4"
@@ -36,3 +36,17 @@ BALL_ROI_SIZE = 320  # Tamaño del ROI (región de interés) para detección loc
 
 # --- Configuración de interpolación de personas ---
 PERSON_MAX_INTERPOLATION_FRAMES = 15  # Máximo de frames sin detección para interpolar
+PERSON_TRACK_HISTORY_MAX = 30  # Máximo de posiciones en historial por track (píxeles/cancha)
+PERSON_KEYPOINT_VISIBILITY_THRESHOLD = 0.0  # Umbral de visibilidad de keypoint para desplazar en interpolación
+
+# --- Tracker de pelota (estela / suavizado) ---
+TRAJECTORY_HISTORY_SIZE = 10  # Puntos de trayectoria en pantalla para la estela
+# Media móvil (pandas rolling) sobre x,y tras interpolación; 0 = desactivado (compat. golden master).
+BALL_MOVING_AVERAGE_WINDOW = 0
+
+# --- PERSISTENCIA ---
+STUBS_FOLDER = "stubs"
+BALL_STUBS_NAME = "ball_detections.pkl"
+PLAYER_STUBS_NAME = "player_detections.pkl"
+# Si False, main no sobrescribe .pkl ya existentes al finalizar inferencia (golden master / comparación).
+OVERWRITE_STUBS = False 

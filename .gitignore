@@ -13,7 +13,13 @@ env/
 # Salidas de video
 output_videos/
 
+# Cobertura pytest-cov
+htmlcov/
+.coverage
+
 # Archivos pesados (límite 100MB de GitHub)
 *.pt
 *.mp4
 *.avi
+
+.env
