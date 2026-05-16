@@ -16,7 +16,7 @@ CONFIG = {
     'KEYPOINT_MODEL_PATH': 'models/model_tennis_court_det.pt',
     
     # Rutas de video
-    'VIDEO_IN_PATH': 'data/videos/test_video6.mp4',
+    'VIDEO_IN_PATH': 'data/videos/test_video1.mp4',
     'VIDEO_OUT_FOLDER': 'output_videos',
     'VIDEO_OUT_BASENAME': 'output_tracking',
     'VIDEO_OUT_EXTENSION': '.mp4',
