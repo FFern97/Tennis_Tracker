@@ -1,0 +1,36 @@
+[run]
+branch = True
+omit =
+    stubs/*
+    output_videos/*
+    main.py
+    config.py
+    tests/*
+    tennis_tracker.py
+    court_detector.py
+    visualization.py
+    visualization_utils.py
+    tracknet.py
+    schema.py
+    yolo_person_detector.py
+
+[report]
+precision = 2
+show_missing = True
+skip_covered = False
+omit =
+    stubs/*
+    output_videos/*
+    main.py
+    config.py
+    tests/*
+    tennis_tracker.py
+    court_detector.py
+    visualization.py
+    visualization_utils.py
+    tracknet.py
+    schema.py
+    yolo_person_detector.py
+
+[html]
+directory = htmlcov
