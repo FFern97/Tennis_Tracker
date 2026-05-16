@@ -21,10 +21,12 @@ def render(
     homography_matrix=None,
     inv_homography=None,
     show_minimap=True,
+    stroke_banner=None,
 ):
     """
     Dibuja en el frame: puntos de cancha, pelota (posición/gap), jugadores y minimap.
     Diseñado para uso en el loop principal: visualization.render(frame, ball_info, players_info).
+    stroke_banner: texto opcional (ej. etiqueta de golpe detectado).
     """
     out = frame.copy()
 
@@ -47,6 +49,23 @@ def render(
 
     # Jugadores (posición + esqueleto desde trackers)
     out = draw_players_from_info(out, players_info)
+
+    # Golpe detectado (cinemática / etiqueta IA)
+    if stroke_banner:
+        _h, w = out.shape[:2]
+        bar_w = min(760, w - 8)
+        cv2.rectangle(out, (4, 4), (bar_w, 58), (28, 28, 28), -1)
+        cv2.rectangle(out, (4, 4), (bar_w, 58), (70, 180, 70), 2)
+        cv2.putText(
+            out,
+            stroke_banner,
+            (14, 42),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.85,
+            (180, 255, 180),
+            2,
+            cv2.LINE_AA,
+        )
 
     # Mini-mapa (opcional)
     if show_minimap and homography_matrix is not None and inv_homography is not None:

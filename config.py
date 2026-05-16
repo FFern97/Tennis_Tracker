@@ -49,4 +49,18 @@ STUBS_FOLDER = "stubs"
 BALL_STUBS_NAME = "ball_detections.pkl"
 PLAYER_STUBS_NAME = "player_detections.pkl"
 # Si False, main no sobrescribe .pkl ya existentes al finalizar inferencia (golden master / comparación).
-OVERWRITE_STUBS = False 
+OVERWRITE_STUBS = False
+
+# --- Impacto / dataset (cinemática + Parquet + Supabase) ---
+# Distancia máxima pelota–muñeca (px imagen) para candidato a golpe.
+IMPACT_THRESHOLD_PX = 85.0
+# Mínimo IoU entre caja del track (YOLO track) y caja pose (YoloPoseDetector) para copiar keypoints.
+IMPACT_POSE_IOU_MIN = 0.22
+# Confianza mínima del keypoint muñeca para considerar el impacto.
+IMPACT_WRIST_CONF_MIN = 0.25
+# Frames mínimos entre dos golpes registrados (evita disparos múltiples).
+IMPACT_COOLDOWN_FRAMES = 15
+# Duración del aviso visual tras detectar golpe.
+IMPACT_OVERLAY_FRAMES = 18
+# Carpeta base para secuencias Parquet por video: datasets/strokes/<video_key>/stroke_XXXX_fY.parquet
+PARQUET_STROKES_FOLDER = "datasets/strokes"
