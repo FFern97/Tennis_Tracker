@@ -95,6 +95,31 @@ def test_log_stroke_sets_requires_review_below_threshold(mock_client, mock_supab
     assert payload["requires_review"] is True
     assert payload["confidence_score"] == pytest.approx(CONFIDENCE_REVIEW_THRESHOLD - 0.1)
     assert payload["kinematics"]["side"] == "forehand"
+    assert payload["side_detected"] == "forehand"
+    assert payload["zone_detected"] == "mid"
+
+
+def test_log_stroke_maps_zone_and_velocity(mock_client, mock_supabase_table):
+    mock_supabase_table.insert.return_value.execute.return_value = _exec_result([{"id": "s3"}])
+    log = SupabaseLogger(client=mock_client)
+
+    log.log_stroke(
+        {
+            "video_id": "v1",
+            "confidence_score": 0.8,
+            "kinematics": {
+                "side": "backhand",
+                "zone": "high",
+                "velocity": [12.5, -3.2],
+            },
+        }
+    )
+
+    payload = mock_supabase_table.insert.call_args[0][0]
+    assert payload["side_detected"] == "backhand"
+    assert payload["zone_detected"] == "high"
+    assert payload["avg_velocity_x"] == pytest.approx(12.5)
+    assert payload["avg_velocity_y"] == pytest.approx(-3.2)
 
 
 def test_log_stroke_requires_review_false_above_threshold(mock_client, mock_supabase_table):

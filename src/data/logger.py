@@ -36,7 +36,8 @@ class SupabaseLogger:
     Tablas esperadas (Postgres/Supabase):
 
     - ``videos``: al menos ``id``, ``filename`` (único lógico), ``metadata`` (json/jsonb).
-    - ``strokes``: al menos ``video_id``, ``confidence_score``, ``requires_review``, ``kinematics`` (json/jsonb).
+    - ``strokes``: al menos ``video_id``, ``confidence_score``, ``requires_review``, ``kinematics`` (json/jsonb),
+      y columnas derivadas ``side_detected``, ``zone_detected``, ``avg_velocity_x``, ``avg_velocity_y``.
     """
 
     def __init__(
@@ -118,14 +119,27 @@ class SupabaseLogger:
         try:
             video_id = stroke_data["video_id"]
             confidence = float(stroke_data["confidence_score"])
-            kinematics = dict(stroke_data.get("kinematics", {}))
+            kinematics_data = dict(stroke_data.get("kinematics", {}))
 
             row = {
                 "video_id": video_id,
                 "confidence_score": confidence,
                 "requires_review": confidence < CONFIDENCE_REVIEW_THRESHOLD,
-                "kinematics": kinematics,
+                "kinematics": kinematics_data,
+                "side_detected": kinematics_data.get("side"),
+                "zone_detected": kinematics_data.get("zone")
+                or kinematics_data.get("vertical_zone"),
             }
+
+            velocity = kinematics_data.get("velocity")
+            if isinstance(velocity, (list, tuple)) and len(velocity) >= 2:
+                row["avg_velocity_x"] = float(velocity[0])
+                row["avg_velocity_y"] = float(velocity[1])
+            else:
+                if kinematics_data.get("avg_velocity_x") is not None:
+                    row["avg_velocity_x"] = float(kinematics_data["avg_velocity_x"])
+                if kinematics_data.get("avg_velocity_y") is not None:
+                    row["avg_velocity_y"] = float(kinematics_data["avg_velocity_y"])
             res = self._client.table("strokes").insert(row).execute()
             rows = getattr(res, "data", None) or []
             return rows[0] if rows else None
