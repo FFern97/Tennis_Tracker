@@ -11,6 +11,7 @@ if _SRC.is_dir():
 
 import os
 import pickle
+import shutil
 from collections import deque
 from dataclasses import replace
 from typing import Optional
@@ -45,14 +46,59 @@ def _ensure_scipy():
         raise SystemExit(1)
 
 
-def _next_output_path():
-    counter = 1
-    while True:
-        name = f"{config.VIDEO_OUT_BASENAME}{counter}{config.VIDEO_OUT_EXTENSION}"
-        path = os.path.join(config.VIDEO_OUT_FOLDER, name)
-        if not os.path.exists(path):
-            return path
-        counter += 1
+def _output_video_path(video_in_path: Optional[str] = None) -> str:
+    """Ruta de salida: mismo nombre que el video de entrada dentro de VIDEO_OUT_FOLDER."""
+    in_path = video_in_path if video_in_path is not None else config.VIDEO_IN_PATH
+    return os.path.join(config.VIDEO_OUT_FOLDER, os.path.basename(in_path))
+
+
+def _reencode_video_h264(video_path: str) -> bool:
+    """
+    Convierte el MP4 escrito por OpenCV (mp4v) a H.264 para reproducción en Streamlit/navegador.
+    Usa el FFmpeg empaquetado de moviepy (imageio-ffmpeg); no requiere instalación a nivel de SO.
+    """
+    if not os.path.isfile(video_path):
+        print(f"Re-codificación omitida: no existe {video_path}")
+        return False
+
+    base, ext = os.path.splitext(video_path)
+    temp_path = f"{base}_h264{ext or config.VIDEO_OUT_EXTENSION}"
+
+    clip = None
+    try:
+        from moviepy.editor import VideoFileClip
+    except ImportError as exc:
+        print(f"Advertencia: moviepy no instalado; el video queda en codec OpenCV ({exc})")
+        return False
+
+    try:
+        print(f"Re-codificando a H.264 (libx264): {video_path}")
+        clip = VideoFileClip(video_path)
+        clip.write_videofile(
+            temp_path,
+            codec="libx264",
+            audio=False,
+            logger=None,
+            ffmpeg_params=["-movflags", "faststart", "-pix_fmt", "yuv420p"],
+        )
+        clip.close()
+        clip = None
+        shutil.move(temp_path, video_path)
+        print(f"Video compatible con navegador: {video_path}")
+        return True
+    except Exception as exc:
+        print(f"Advertencia: re-codificación H.264 falló ({exc}); se conserva el archivo mp4v.")
+        if clip is not None:
+            try:
+                clip.close()
+            except Exception:
+                pass
+        if os.path.isfile(temp_path):
+            try:
+                os.remove(temp_path)
+            except OSError:
+                pass
+        return False
 
 
 def _load_court_model():
@@ -125,9 +171,8 @@ def main(
         if dir_path:
             os.makedirs(dir_path, exist_ok=True)
 
-    video_out_path = _next_output_path()
-
     video_basename = os.path.basename(config.VIDEO_IN_PATH)
+    video_out_path = _output_video_path(config.VIDEO_IN_PATH)
     video_key = os.path.splitext(video_basename)[0]
     stubs_subdir = os.path.join(config.STUBS_FOLDER, video_key)
     ball_stubs_path = os.path.join(stubs_subdir, config.BALL_STUBS_NAME)
@@ -346,6 +391,7 @@ def main(
     out.release()
     cv2.destroyAllWindows()
     print(f"Video guardado: {video_out_path}")
+    _reencode_video_h264(video_out_path)
 
     if not read_from_stubs:
         stubs_already_on_disk = os.path.isfile(ball_stubs_path) and os.path.isfile(player_stubs_path)

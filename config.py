@@ -9,8 +9,8 @@ BALL_MODEL_PATH = "models/best.pt"
 KEYPOINT_MODEL_PATH = "models/model_tennis_court_det.pt"
 
 # --- Rutas de video (relativas al proyecto) ---
-VIDEO_IN_PATH = "data/videos/test_video1.mp4"
-VIDEO_OUT_FOLDER = "output_videos"
+VIDEO_IN_PATH = "data/videos/test_video2.mp4"
+VIDEO_OUT_FOLDER = "static/output_videos"
 VIDEO_OUT_BASENAME = "output_tracking"
 VIDEO_OUT_EXTENSION = ".mp4"
 

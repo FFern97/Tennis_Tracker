@@ -10,8 +10,10 @@ env/
 .vscode/
 .idea/
 
-# Salidas de video
-output_videos/
+# Ignorar videos procesados pero mantener la carpeta
+static/output_videos/*.mp4
+static/output_videos/*.avi
+static/output_videos/*.mov
 
 # Cobertura pytest-cov
 htmlcov/
@@ -23,3 +25,8 @@ htmlcov/
 *.avi
 
 .env
+
+# Entornos y datos locales
+.cursor/
+datasets/
+stubs/
