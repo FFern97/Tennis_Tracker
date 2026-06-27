@@ -5,7 +5,7 @@ import pandas as pd
 import io
 import contextlib
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Asegurar visibilidad de módulos
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -16,6 +16,16 @@ from src.data.logger import SupabaseLogger
 
 # Inicializar Logger para la pestaña de Auditoría
 logger = SupabaseLogger()
+HITL_REVIEWER_NAME = "Juan"
+
+
+def _insert_annotation(stroke_id: str, label_human: str) -> None:
+    logger.client.table("annotations").insert({
+        "stroke_id": stroke_id,
+        "label_human": label_human,
+        "reviewer_name": HITL_REVIEWER_NAME,
+        "reviewed_at": datetime.now(timezone.utc).isoformat(),
+    }).execute()
 
 st.set_page_config(page_title="Tennis Data Factory", page_icon="🎾", layout="wide")
 
@@ -132,7 +142,9 @@ with tab_auditoria:
                     
                     c1, c2 = st.columns(2)
                     if c1.button("✅ Todo OK", key="ok"):
-                        logger.client.table("strokes").update({"requires_review": False}).eq("id", curr_stroke['id']).execute()
+                        label = curr_stroke.get("side_detected") or curr_stroke.get("kinematics", {}).get("side", "forehand")
+                        logger.client.table("strokes").update({"requires_review": False}).eq("id", curr_stroke["id"]).execute()
+                        _insert_annotation(curr_stroke["id"], label)
                         st.success("Verificado")
                         st.rerun()
                     
@@ -151,8 +163,9 @@ with tab_auditoria:
                     if st.button("💾 Guardar Corrección"):
                         logger.client.table("strokes").update({
                             "side_detected": new_side,
-                            "requires_review": False
-                        }).eq("id", curr_stroke['id']).execute()
+                            "requires_review": False,
+                        }).eq("id", curr_stroke["id"]).execute()
+                        _insert_annotation(curr_stroke["id"], new_side)
                         st.success(f"Cambiado a {new_side}")
                         st.rerun()
 

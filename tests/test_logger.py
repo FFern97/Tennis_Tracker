@@ -53,13 +53,19 @@ def test_get_or_create_video_inserts_when_missing(mock_client, mock_supabase_tab
 
     log = SupabaseLogger(client=mock_client)
 
-    vid = log.get_or_create_video("nuevo.mp4", {"fps": 24})
+    vid = log.get_or_create_video(
+        "nuevo.mp4",
+        {"fps": 24, "frame_width": 1920, "frame_height": 1080},
+    )
 
     assert vid == "new-vid"
     mock_supabase_table.insert.assert_called_once()
     call_kw = mock_supabase_table.insert.call_args[0][0]
     assert call_kw["filename"] == "nuevo.mp4"
-    assert call_kw["metadata"] == {"fps": 24}
+    assert call_kw["metadata"] == {"fps": 24, "frame_width": 1920, "frame_height": 1080}
+    assert call_kw["fps"] == pytest.approx(24.0)
+    assert call_kw["width"] == 1920
+    assert call_kw["height"] == 1080
 
 
 def test_get_or_create_video_returns_none_on_exception(mock_client, mock_supabase_table):
@@ -97,6 +103,22 @@ def test_log_stroke_sets_requires_review_below_threshold(mock_client, mock_supab
     assert payload["kinematics"]["side"] == "forehand"
     assert payload["side_detected"] == "forehand"
     assert payload["zone_detected"] == "mid"
+
+
+def test_log_stroke_sets_impact_frame_from_kinematics(mock_client, mock_supabase_table):
+    mock_supabase_table.insert.return_value.execute.return_value = _exec_result([{"id": "s-frame"}])
+    log = SupabaseLogger(client=mock_client)
+
+    log.log_stroke(
+        {
+            "video_id": "v1",
+            "confidence_score": 0.7,
+            "kinematics": {"frame_number": 731, "side": "forehand"},
+        }
+    )
+
+    payload = mock_supabase_table.insert.call_args[0][0]
+    assert payload["impact_frame"] == 731
 
 
 def test_log_stroke_maps_zone_and_velocity(mock_client, mock_supabase_table):

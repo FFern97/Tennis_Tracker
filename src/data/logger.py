@@ -27,6 +27,25 @@ def _load_supabase_client(url: str, key: str):
     return create_client(url, key)
 
 
+def _video_columns_from_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
+    """Extrae fps, width y height de metadata para columnas dedicadas en ``videos``."""
+    cols: dict[str, Any] = {}
+    fps = metadata.get("fps")
+    if fps is not None:
+        cols["fps"] = float(fps)
+    width = metadata.get("width")
+    if width is None:
+        width = metadata.get("frame_width")
+    if width is not None:
+        cols["width"] = int(width)
+    height = metadata.get("height")
+    if height is None:
+        height = metadata.get("frame_height")
+    if height is not None:
+        cols["height"] = int(height)
+    return cols
+
+
 class SupabaseLogger:
     """
     Cliente opcional a Supabase + utilidad Parquet.
@@ -35,9 +54,10 @@ class SupabaseLogger:
 
     Tablas esperadas (Postgres/Supabase):
 
-    - ``videos``: al menos ``id``, ``filename`` (único lógico), ``metadata`` (json/jsonb).
-    - ``strokes``: al menos ``video_id``, ``confidence_score``, ``requires_review``, ``kinematics`` (json/jsonb),
+    - ``videos``: ``id``, ``filename``, ``metadata`` (json/jsonb), y columnas ``fps``, ``width``, ``height``.
+    - ``strokes``: ``video_id``, ``confidence_score``, ``requires_review``, ``kinematics``, ``impact_frame``,
       y columnas derivadas ``side_detected``, ``zone_detected``, ``avg_velocity_x``, ``avg_velocity_y``.
+    - ``annotations``: ``stroke_id``, ``label_human``, ``reviewer_name``, ``reviewed_at`` (HITL).
     """
 
     def __init__(
@@ -86,11 +106,9 @@ class SupabaseLogger:
                 vid = rows[0].get("id")
                 return str(vid) if vid is not None else None
 
-            ins = (
-                self._client.table("videos")
-                .insert({"filename": filename, "metadata": dict(metadata)})
-                .execute()
-            )
+            row = {"filename": filename, "metadata": dict(metadata)}
+            row.update(_video_columns_from_metadata(metadata))
+            ins = self._client.table("videos").insert(row).execute()
             inserted = getattr(ins, "data", None) or []
             if not inserted:
                 logger.warning("get_or_create_video: inserción sin filas devueltas para %s.", filename)
@@ -130,6 +148,9 @@ class SupabaseLogger:
                 "zone_detected": kinematics_data.get("zone")
                 or kinematics_data.get("vertical_zone"),
             }
+            frame_number = kinematics_data.get("frame_number")
+            if frame_number is not None:
+                row["impact_frame"] = int(frame_number)
 
             velocity = kinematics_data.get("velocity")
             if isinstance(velocity, (list, tuple)) and len(velocity) >= 2:
