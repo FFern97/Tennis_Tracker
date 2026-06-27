@@ -1,0 +1,82 @@
+meta:
+  generated_by: sdd-scan
+  commit: 85b1e8e75bc1e87ee7180ee30067f871eef9165b
+  updated: 2026-06-27
+
+domains:
+  vision_tracking:
+    description: "Detección YOLO, tracking de pelota/jugadores y geometría de cancha (homografía)"
+    entities: [FrameData, Detection, PlayerDetection, BallInfo, PlayersInfo]
+    services: [YoloDetector, BallTracker, PlayerTracker, CourtDetector]
+    components: []
+    storage: stubs_pickle
+    features: []
+    depends_on: []
+    files:
+      types: [src/schema.py, core/interfaces.py]
+      services: [inference.py, court_detector.py, geometry_utils.py, tracknet.py]
+      trackers: [trackers/ball_tracker.py, trackers/player_tracker.py, trackers/__init__.py]
+      tests: [tests/test_inference.py, tests/test_ball_tracker.py, tests/test_player_tracker.py, tests/test_geometry_utils.py, tests/test_interfaces.py, tests/test_yolo_detector.py, tests/test_golden_master.py]
+
+  stroke_analytics:
+    description: "Cinemática 2D, fusión pose/track y detección de impactos (golpes)"
+    entities: [stroke_kinematics, impact_candidate]
+    services: [kinematics_engine, impact_utils, YoloPoseDetector]
+    components: []
+    storage: parquet_sequences
+    features: []
+    depends_on: [vision_tracking]
+    files:
+      analytics: [src/analytics/kinematics.py, src/analytics/__init__.py]
+      pipeline: [src/pipeline/impact_utils.py, src/pipeline/__init__.py]
+      detectors: [src/detectors/yolo_pose_detector.py, src/detectors/__init__.py]
+      tests: [tests/test_kinematics.py, tests/test_impact_utils.py]
+
+  data_factory:
+    description: "Registro de videos/golpes en Supabase y exportación Parquet para entrenamiento"
+    entities: [Video, Stroke, Annotation]
+    services: [SupabaseLogger]
+    components: []
+    storage: supabase_postgres
+    features: []
+    depends_on: [stroke_analytics, vision_tracking]
+    files:
+      services: [src/data/logger.py, src/data/__init__.py]
+      scripts: [smoke_test_supabase.py]
+      tests: [tests/test_logger.py]
+
+  visualization:
+    description: "Renderizado de video anotado, minimap y overlay de golpes detectados"
+    entities: [annotated_frame, minimap, stroke_banner]
+    services: [render, draw_utils]
+    components: []
+    storage: filesystem_mp4
+    features: []
+    depends_on: [vision_tracking, stroke_analytics]
+    files:
+      services: [visualization.py, visualization_utils.py]
+      output: [static/output_videos/.gitkeep]
+
+  orchestration:
+    description: "Entry points y configuración global del pipeline"
+    entities: []
+    services: []
+    components: [main_pipeline]
+    storage: none
+    features: []
+    depends_on: [vision_tracking, stroke_analytics, data_factory, visualization]
+    files:
+      entry: [main.py]
+      config: [config.py]
+
+  operator_ui:
+    description: "UI Streamlit — ingesta de videos y auditoría HITL de golpes"
+    entities: [review_session, human_annotation]
+    services: [ingest_tab, audit_tab]
+    components: [TennisDataFactoryApp]
+    storage: supabase_postgres
+    features: []
+    # Auditoría HITL solo lee/escribe strokes y annotations vía Supabase; no invoca stroke_analytics en runtime.
+    depends_on: [data_factory, orchestration]
+    files:
+      ui: [app.py, .streamlit/config.toml]
