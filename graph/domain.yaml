@@ -2,6 +2,8 @@ meta:
   generated_by: sdd-scan
   commit: 85b1e8e75bc1e87ee7180ee30067f871eef9165b
   updated: 2026-06-27
+  last_updated_by: sdd-generate
+  last_updated_at: 2026-07-01
 
 domains:
   vision_tracking:
@@ -10,7 +12,7 @@ domains:
     services: [YoloDetector, BallTracker, PlayerTracker, CourtDetector]
     components: []
     storage: stubs_pickle
-    features: []
+    features: [001-refactor-consolidar-src]
     depends_on: []
     files:
       types: [src/schema.py, core/interfaces.py]
@@ -51,7 +53,7 @@ domains:
     services: [render, draw_utils]
     components: []
     storage: filesystem_mp4
-    features: []
+    features: [001-refactor-consolidar-src]
     depends_on: [vision_tracking, stroke_analytics]
     files:
       services: [visualization.py, visualization_utils.py]
@@ -63,7 +65,7 @@ domains:
     services: []
     components: [main_pipeline]
     storage: none
-    features: []
+    features: [001-refactor-consolidar-src]
     depends_on: [vision_tracking, stroke_analytics, data_factory, visualization]
     files:
       entry: [main.py]

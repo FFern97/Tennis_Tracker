@@ -1,0 +1,44 @@
+# Registro maestro de features — mantenido por los comandos SDD
+# /sdd-generate agrega entradas · /sdd-review cierra · /sdd-health audita
+
+features:
+  - id: 001-refactor-consolidar-src
+    type: feature
+    status: OPEN
+    domain: vision_tracking
+    owner: dev
+    sprint: null
+    created: 2026-07-01
+    closed: null
+    touches:
+      # Crear
+      - specs/001-refactor-consolidar-src/baseline-coverage.md
+      - src/__init__.py
+      - src/visualization/
+      - src/trackers/
+      - src/vision_tracking/
+      - src/core/
+      - src/core/interfaces.py
+      # Mover (pre → post; ambos para colisiones)
+      - visualization.py
+      - visualization_utils.py
+      - trackers/
+      - inference.py
+      - court_detector.py
+      - geometry_utils.py
+      - tracknet.py
+      - core/interfaces.py
+      # Modificar
+      - main.py
+      - app.py
+      - config.py
+      - pytest.ini
+      - .coveragerc
+      - graph/domain.yaml
+      - existing-arch.md
+      - DECISIONS.md
+      - tests/
+      # Eliminar (pre)
+      - tennis_tracker.py
+      - yolo_person_detector.py
+    decisions: []
