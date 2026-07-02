@@ -6,7 +6,7 @@
 
 1. **Comportamiento idéntico** — Tras cada slice: `pytest -q` y golden master exit 0 sin diffs.
 2. **Layout por dominio** — Código de dominio bajo `src/<dominio>/`; entry points solo en raíz.
-3. **Imports full-path** — Entre módulos de `src/`: `from src.<paquete>.<módulo> import …` (sin excepciones; incluye schema, analytics, pipeline, data, detectors).
+3. **Imports full-path (estado final)** — Al cierre de la feature (post-slice-4): todo import entre módulos de `src/` usa `from src.<paquete>.<módulo> import …`. Estado transitorio (slices 1–3): módulos movidos usan full-path inmediatamente; módulos no movidos mantienen imports bare (permitidos por `pythonpath = . src`) hasta T013.
 4. **Moves atómicos** — `git mv` + imports actualizados en el mismo commit; un commit por slice en `main`.
 5. **Gates por slice** — pytest, golden master, cobertura ≥ baseline, `git grep` sin paths viejos, `graph/domain.yaml` actualizado.
 6. **DIP intacto** — Orquestador depende de `BaseDetector` / `BaseTracker` (`src/core/interfaces.py` post slice 3).
@@ -14,6 +14,7 @@
 8. **`config.py` intacto** — Constantes MAYÚSCULAS sin cambio de valor; solo entry points reciben imports mecánicos.
 9. **Golden master** — Stubs en `stubs/<video_key>/`; `OVERWRITE_STUBS=False`.
 10. **Cierre documental** — Slice 4: `existing-arch.md`, `graph/domain.yaml`, `DECISIONS.md`.
+11. **Alias `PersonTracker`** — Se elimina en slice 3. Requiere entrada en `DECISIONS.md` porque `existing-arch.md` lo documenta como patrón vigente.
 
 ## PROHIBITED
 

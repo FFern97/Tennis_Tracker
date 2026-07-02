@@ -14,6 +14,10 @@
 **When** un módulo en `src/` importa otro de `src/`  
 **Then** usa `from src.<paquete>.<módulo> import …` (verificable en diff)
 
+**Given** slice 4 completado  
+**When** ejecuto `git grep -E "^from (schema|analytics|pipeline|data|detectors)"` fuera de `src/`  
+**Then** 0 hits
+
 ## US-3 — Pipeline sin regresión
 **Given** cualquier slice cerrado  
 **When** ejecuto `pytest -q` y `python tests/test_golden_master.py`  
@@ -33,6 +37,19 @@
 **Given** slice 4 completado  
 **When** leo `existing-arch.md` y `graph/domain.yaml`  
 **Then** `source_root` describe layout unificado bajo `src/` sin “híbrido” ni `sys.path.insert`
+
+## US-7 — Estado final verificable globalmente
+**Como** desarrollador  
+**Quiero** verificar el cierre de la feature con comandos concretos  
+**Para** confirmar sin ambigüedad que el refactor terminó
+
+**Given** slice 4 completado  
+**When** ejecuto los verificadores globales  
+**Then** todos pasan:
+- Raíz: solo `main.py`, `app.py`, `config.py` como `.py` de dominio
+- `git grep "sys.path.insert"` fuera de tests → 0 hits en producción
+- `git grep -E "^from (visualization|inference|court_detector|geometry_utils|tracknet|trackers)"` → 0 hits
+- Todo `__init__.py` bajo `src/` vacío (0 líneas de código; comentarios opcionales)
 
 ## Measurable Process Outcomes (DX)
 - **DX-001**: Implementación completa con **< 8** ciclos de autocorrección (rework) en total.
