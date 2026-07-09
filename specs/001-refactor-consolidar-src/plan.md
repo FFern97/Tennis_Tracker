@@ -25,8 +25,9 @@ Ver `input.md` §5: `src/visualization/`, `src/trackers/`, `src/vision_tracking/
 
 ## Modificar por slice
 - **Slice 1:** imports full-path para módulos movidos; `pytest.ini` → `pythonpath = . src` (coexistencia: full-path movidos + bare no movidos); `.coveragerc`, `graph/domain.yaml`; entry points solo imports mecánicos; `sys.path.insert` **permanece**
-- **Slices 2–3:** imports full-path + config + graph; `pytest.ini` sigue en `pythonpath = . src`
-- **Slice 4:** quitar `sys.path.insert`; imports full-path restantes (T012.5); `pytest.ini` → `pythonpath = .` (sin fallback bare); eliminar alias `PersonTracker`; `existing-arch.md`, `DECISIONS.md`, `graph/domain.yaml`
+- **Slice 2:** imports full-path + config + graph; `pytest.ini` sigue en `pythonpath = . src`
+- **Slice 3:** imports full-path cross-domain + config + graph; eliminar alias `PersonTracker` (MUST 11 / T009); `pytest.ini` sigue en `pythonpath = . src`
+- **Slice 4:** quitar `sys.path.insert`; imports full-path restantes (T013); `pytest.ini` → `pythonpath = .` (sin fallback bare); `existing-arch.md`, `DECISIONS.md`, `graph/domain.yaml`
 
 ## Verificación por slice
 `pytest -q` · `python tests/test_golden_master.py` · `pytest --cov` vs `baseline-coverage.md` · `git grep` paths viejos
