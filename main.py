@@ -35,7 +35,7 @@ from court_detector import CourtDetector
 from inference import YoloDetector
 from trackers import BallTracker, PlayerTracker
 from schema import FrameData, BallInfo, PlayersInfo
-from visualization import render
+from src.visualization.visualization import render
 
 
 def _ensure_scipy():

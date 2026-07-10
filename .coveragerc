@@ -8,8 +8,8 @@ omit =
     tests/*
     tennis_tracker.py
     court_detector.py
-    visualization.py
-    visualization_utils.py
+    src/visualization/visualization.py
+    src/visualization/visualization_utils.py
     tracknet.py
     schema.py
     yolo_person_detector.py
@@ -26,8 +26,8 @@ omit =
     tests/*
     tennis_tracker.py
     court_detector.py
-    visualization.py
-    visualization_utils.py
+    src/visualization/visualization.py
+    src/visualization/visualization_utils.py
     tracknet.py
     schema.py
     yolo_person_detector.py

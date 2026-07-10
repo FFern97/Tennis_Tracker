@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 
 from schema import BallInfo, PlayersInfo
-from visualization_utils import (
+from src.visualization.visualization_utils import (
     draw_keypoints,
     draw_players_from_info,
     draw_minimap,

@@ -2,8 +2,8 @@ meta:
   generated_by: sdd-scan
   commit: 85b1e8e75bc1e87ee7180ee30067f871eef9165b
   updated: 2026-06-27
-  last_updated_by: sdd-generate
-  last_updated_at: 2026-07-01
+  last_updated_by: sdd-implement
+  last_updated_at: 2026-07-10
 
 domains:
   vision_tracking:
@@ -56,7 +56,7 @@ domains:
     features: [001-refactor-consolidar-src]
     depends_on: [vision_tracking, stroke_analytics]
     files:
-      services: [visualization.py, visualization_utils.py]
+      services: [src/visualization/visualization.py, src/visualization/visualization_utils.py]
       output: [static/output_videos/.gitkeep]
 
   orchestration:
