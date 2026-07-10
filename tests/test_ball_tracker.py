@@ -5,7 +5,7 @@ import pytest
 
 import config
 from schema import Detection, BallInfo
-from trackers.ball_tracker import BallTracker
+from src.trackers.ball_tracker import BallTracker
 
 
 def _det(x, y, conf=0.99):

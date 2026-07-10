@@ -8,7 +8,7 @@ import pytest
 
 import config
 from schema import PlayerDetection, PlayersInfo
-from trackers.player_tracker import PlayerTracker
+from src.trackers.player_tracker import PlayerTracker
 
 
 def _player(track_id, x, y, conf=0.9, keypoints=None):
@@ -31,7 +31,7 @@ def small_interp_window(monkeypatch):
 
 def test_track_lifecycle_create_update_remove(small_interp_window):
     """Crear track, actualizar, perder detección hasta superar missing_frames y eliminar."""
-    with patch("trackers.player_tracker.cv2.perspectiveTransform") as pt_mock:
+    with patch("src.trackers.player_tracker.cv2.perspectiveTransform") as pt_mock:
         pt_mock.return_value = np.array([[[1.0, 2.0]]], dtype=np.float32)
 
         tr = PlayerTracker()
@@ -59,7 +59,7 @@ def test_track_lifecycle_create_update_remove(small_interp_window):
 
 def test_interpolation_generates_missing_positions(small_interp_window):
     """Con al menos 2 puntos en historial, la interpolación predice px desplazados."""
-    with patch("trackers.player_tracker.cv2.perspectiveTransform") as pt_mock:
+    with patch("src.trackers.player_tracker.cv2.perspectiveTransform") as pt_mock:
         pt_mock.return_value = np.array([[[0.0, 0.0]]], dtype=np.float32)
 
         tr = PlayerTracker()
@@ -82,7 +82,7 @@ def test_interpolation_generates_missing_positions(small_interp_window):
 
 def test_keypoints_high_confidence_vs_zero(small_interp_window):
     """Solo keypoints con confianza > umbral reciben el offset; conf 0 no se mueve."""
-    with patch("trackers.player_tracker.cv2.perspectiveTransform") as pt_mock:
+    with patch("src.trackers.player_tracker.cv2.perspectiveTransform") as pt_mock:
         pt_mock.return_value = np.array([[[0.0, 0.0]]], dtype=np.float32)
 
         tr = PlayerTracker()
@@ -118,7 +118,7 @@ def test_set_homography_singular_returns_none():
 
 def test_get_track_history_and_get_all_tracks():
     tr = PlayerTracker()
-    with patch("trackers.player_tracker.cv2.perspectiveTransform", return_value=np.array([[[0.0, 0.0]]])):
+    with patch("src.trackers.player_tracker.cv2.perspectiveTransform", return_value=np.array([[[0.0, 0.0]]])):
         tr.update([_player(3, 1.0, 2.0)], frame_number=1)
     hpx, hc, hk = tr.get_track_history(3)
     assert len(hpx) >= 1

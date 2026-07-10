@@ -17,7 +17,7 @@ domains:
     files:
       types: [src/schema.py, core/interfaces.py]
       services: [inference.py, court_detector.py, geometry_utils.py, tracknet.py]
-      trackers: [trackers/ball_tracker.py, trackers/player_tracker.py, trackers/__init__.py]
+      trackers: [src/trackers/ball_tracker.py, src/trackers/player_tracker.py, src/trackers/__init__.py]
       tests: [tests/test_inference.py, tests/test_ball_tracker.py, tests/test_player_tracker.py, tests/test_geometry_utils.py, tests/test_interfaces.py, tests/test_yolo_detector.py, tests/test_golden_master.py]
 
   stroke_analytics:

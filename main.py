@@ -33,7 +33,8 @@ from pipeline.impact_utils import (
 from tracknet import BallTrackerNet
 from court_detector import CourtDetector
 from inference import YoloDetector
-from trackers import BallTracker, PlayerTracker
+from src.trackers.ball_tracker import BallTracker
+from src.trackers.player_tracker import PlayerTracker
 from schema import FrameData, BallInfo, PlayersInfo
 from src.visualization.visualization import render
 
