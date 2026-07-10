@@ -1,7 +1,7 @@
 """Cobertura de core/interfaces: ABC y comportamiento por defecto."""
 import pytest
 
-from core.interfaces import BaseDetector, BaseTracker
+from src.core.interfaces import BaseDetector, BaseTracker
 
 
 def test_base_detector_incomplete_raises_type_error():

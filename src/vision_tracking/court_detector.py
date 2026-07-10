@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import torch
 import torchvision.transforms as T
-from geometry_utils import get_trans_matrix, refer_kps
+from src.vision_tracking.geometry_utils import get_trans_matrix, refer_kps
 
 
 def get_coords_from_heatmap(heatmap, low_thresh=150,

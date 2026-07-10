@@ -4,7 +4,7 @@ Motor de inferencia: implementación YOLO detrás de la interfaz BaseDetector (D
 import torch
 from ultralytics import YOLO
 
-from core.interfaces import BaseDetector
+from src.core.interfaces import BaseDetector
 from config import (
     PERSON_MODEL_VARIANT,
     BALL_MODEL_PATH,

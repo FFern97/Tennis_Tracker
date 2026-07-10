@@ -15,8 +15,8 @@ domains:
     features: [001-refactor-consolidar-src]
     depends_on: []
     files:
-      types: [src/schema.py, core/interfaces.py]
-      services: [inference.py, court_detector.py, geometry_utils.py, tracknet.py]
+      types: [src/schema.py, src/core/interfaces.py]
+      services: [src/vision_tracking/inference.py, src/vision_tracking/court_detector.py, src/vision_tracking/geometry_utils.py, src/vision_tracking/tracknet.py]
       trackers: [src/trackers/ball_tracker.py, src/trackers/player_tracker.py, src/trackers/__init__.py]
       tests: [tests/test_inference.py, tests/test_ball_tracker.py, tests/test_player_tracker.py, tests/test_geometry_utils.py, tests/test_interfaces.py, tests/test_yolo_detector.py, tests/test_golden_master.py]
 

@@ -21,7 +21,7 @@ import numpy as np
 import torch
 
 import config
-from core.interfaces import BaseDetector, BaseTracker
+from src.core.interfaces import BaseDetector, BaseTracker
 from data.logger import SupabaseLogger
 from detectors.yolo_pose_detector import YoloPoseDetector
 from pipeline.impact_utils import (
@@ -30,9 +30,9 @@ from pipeline.impact_utils import (
     snapshot_framedata,
     try_detect_stroke,
 )
-from tracknet import BallTrackerNet
-from court_detector import CourtDetector
-from inference import YoloDetector
+from src.vision_tracking.tracknet import BallTrackerNet
+from src.vision_tracking.court_detector import CourtDetector
+from src.vision_tracking.inference import YoloDetector
 from src.trackers.ball_tracker import BallTracker
 from src.trackers.player_tracker import PlayerTracker
 from schema import FrameData, BallInfo, PlayersInfo

@@ -7,10 +7,10 @@ omit =
     config.py
     tests/*
     tennis_tracker.py
-    court_detector.py
+    src/vision_tracking/court_detector.py
     src/visualization/visualization.py
     src/visualization/visualization_utils.py
-    tracknet.py
+    src/vision_tracking/tracknet.py
     schema.py
     yolo_person_detector.py
 
@@ -25,10 +25,10 @@ omit =
     config.py
     tests/*
     tennis_tracker.py
-    court_detector.py
+    src/vision_tracking/court_detector.py
     src/visualization/visualization.py
     src/visualization/visualization_utils.py
-    tracknet.py
+    src/vision_tracking/tracknet.py
     schema.py
     yolo_person_detector.py
 

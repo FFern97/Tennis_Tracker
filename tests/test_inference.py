@@ -30,7 +30,7 @@ def _bootstrap_torch_ultralytics_stubs():
 
 _bootstrap_torch_ultralytics_stubs()
 
-from inference import YoloDetector  # noqa: E402
+from src.vision_tracking.inference import YoloDetector  # noqa: E402
 
 
 def _bare_detector():
@@ -171,7 +171,7 @@ def test_detect_calls_models_and_returns_frame_data(monkeypatch):
     )
     m_ball.predict.return_value = _ball_result_with_boxes([ball_box])
 
-    import inference as inference_mod
+    import src.vision_tracking.inference as inference_mod
 
     calls = {"n": 0}
 

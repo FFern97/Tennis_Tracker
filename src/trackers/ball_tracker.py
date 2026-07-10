@@ -4,7 +4,7 @@ Tracker de pelota: Pure Vision, estela y suavizado Pandas sobre secuencias de de
 import numpy as np
 import pandas as pd
 
-from core.interfaces import BaseTracker
+from src.core.interfaces import BaseTracker
 from schema import Detection, BallInfo
 import config
 

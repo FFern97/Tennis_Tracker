@@ -53,7 +53,7 @@ class BallInfo:
 @dataclass
 class PlayersInfo:
     """
-    Salida del PersonTracker para un frame.
+    Salida del PlayerTracker para un frame.
     """
     active_tracks: dict = field(default_factory=dict)  # track_id -> {px, court, is_interpolated, keypoints}
     all_positions: List[dict] = field(default_factory=list)

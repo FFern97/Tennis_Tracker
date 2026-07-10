@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import os
-from geometry_utils import court_ref
+from src.vision_tracking.geometry_utils import court_ref
 
 
 def draw_keypoints(frame, keypoints):

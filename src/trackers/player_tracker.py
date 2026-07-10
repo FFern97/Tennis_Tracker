@@ -4,7 +4,7 @@ Tracker de jugadores: IDs YOLO, homografía opcional e interpolación en píxele
 import cv2
 import numpy as np
 
-from core.interfaces import BaseTracker
+from src.core.interfaces import BaseTracker
 from schema import PlayerDetection, PlayersInfo
 import config
 
@@ -197,6 +197,3 @@ class PlayerTracker(BaseTracker):
     def get_all_tracks(self):
         return self.tracks.copy()
 
-
-# Compatibilidad con nombre histórico
-PersonTracker = PlayerTracker

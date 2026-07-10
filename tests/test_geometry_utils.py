@@ -8,7 +8,7 @@ pytest.importorskip("scipy")
 
 def test_get_trans_matrix_with_identity_homography():
     """Ejecuta el bucle de configuraciones con homografía identidad simulada."""
-    import geometry_utils as gu
+    from src.vision_tracking import geometry_utils as gu
 
     pts = [(float(x), float(y)) for (x, y) in gu.court_ref.key_points]
 
@@ -26,7 +26,7 @@ def test_get_trans_matrix_with_identity_homography():
 
 
 def test_get_trans_matrix_returns_none_when_all_configs_skip():
-    import geometry_utils as gu
+    from src.vision_tracking import geometry_utils as gu
 
     pts = [(None, None)] * 14
     assert gu.get_trans_matrix(pts) is None
