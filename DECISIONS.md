@@ -33,3 +33,22 @@ El gate de cobertura de Slice 4 compara contra el baseline actualizado.
 (eliminación de código), no regresión de tests. Aplicar el gate literal
 contra 88.22% penalizaría la eliminación de código muerto/redundante,
 contradiciendo el objetivo de MUST 7.
+
+## 2026-07-10 — T011: Eliminación de scripts legacy en raíz
+
+**Contexto**: `tennis_tracker.py` y `yolo_person_detector.py` permanecían en la raíz
+como histórico pre-consolidación (`existing-arch.md`). Slice 4 T011 cierra el legacy
+cleanup de la feature `001-refactor-consolidar-src`.
+
+**Decisión**: Eliminar ambos scripts con `git rm` (`tennis_tracker.py`, `yolo_person_detector.py`).
+
+**Justificación**: 0 callers externos (git grep: imports anclados + grep plano sin blockers
+en código/CI). `tennis_tracker.py` tenía imports rotos a paths pre-consolidación
+(`tracknet`, `court_detector`, `visualization_utils`, `trackers`) y a `PersonTracker`
+(eliminado en Slice 3). `yolo_person_detector.py` era standalone (solo deps externas),
+sin uso en el pipeline consolidado. Reemplazados funcionalmente por `main.py` (entry point)
++ `src/vision_tracking/` + `src/trackers/`.
+
+**Impacto**: Sin impacto en tests ni cobertura (ambos en `omit` de `.coveragerc`;
+TOTAL permanece 88.16%). Referencias documentales en specs/ y `features.yaml` se
+actualizan en T014.
