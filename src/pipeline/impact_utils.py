@@ -7,13 +7,13 @@ from typing import Any, List, Optional
 
 import numpy as np
 
-from analytics.kinematics import (
+from src.analytics.kinematics import (
     classify_side,
     classify_vertical_zone,
     detect_impact_candidate,
     get_distance,
 )
-from schema import FrameData, PlayerDetection
+from src.schema import FrameData, PlayerDetection
 
 # Índices COCO (17 keypoints)
 KP_NOSE = 0

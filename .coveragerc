@@ -6,13 +6,11 @@ omit =
     main.py
     config.py
     tests/*
-    tennis_tracker.py
     src/vision_tracking/court_detector.py
     src/visualization/visualization.py
     src/visualization/visualization_utils.py
     src/vision_tracking/tracknet.py
     schema.py
-    yolo_person_detector.py
 
 [report]
 precision = 2
@@ -24,13 +22,11 @@ omit =
     main.py
     config.py
     tests/*
-    tennis_tracker.py
     src/vision_tracking/court_detector.py
     src/visualization/visualization.py
     src/visualization/visualization_utils.py
     src/vision_tracking/tracknet.py
     schema.py
-    yolo_person_detector.py
 
 [html]
 directory = htmlcov

@@ -8,7 +8,7 @@ from typing import Literal, Union
 
 import numpy as np
 
-from schema import Detection
+from src.schema import Detection
 
 PointLike = Union[tuple[float, float], Detection]
 

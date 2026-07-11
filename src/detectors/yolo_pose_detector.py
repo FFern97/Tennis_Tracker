@@ -8,7 +8,7 @@ from typing import Any, List, Union
 import numpy as np
 
 from src.core.interfaces import BaseDetector
-from schema import FrameData, PlayerDetection
+from src.schema import FrameData, PlayerDetection
 
 DEFAULT_MODEL = "yolov8n-pose.pt"
 DEFAULT_CONF = 0.25

@@ -15,7 +15,7 @@ from config import (
     PERSON_IMGSZ,
     BALL_ROI_SIZE,
 )
-from schema import FrameData, Detection, PlayerDetection
+from src.schema import FrameData, Detection, PlayerDetection
 
 
 class YoloDetector(BaseDetector):

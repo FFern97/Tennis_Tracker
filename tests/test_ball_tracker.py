@@ -4,7 +4,7 @@ Tests unitarios de BallTracker: mocks de detecciones, sin video ni modelos.
 import pytest
 
 import config
-from schema import Detection, BallInfo
+from src.schema import Detection, BallInfo
 from src.trackers.ball_tracker import BallTracker
 
 

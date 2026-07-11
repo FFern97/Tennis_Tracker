@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 
 from src.core.interfaces import BaseTracker
-from schema import PlayerDetection, PlayersInfo
+from src.schema import PlayerDetection, PlayersInfo
 import config
 
 

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from src.core.interfaces import BaseTracker
-from schema import Detection, BallInfo
+from src.schema import Detection, BallInfo
 import config
 
 

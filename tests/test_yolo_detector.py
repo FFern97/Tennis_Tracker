@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from detectors.yolo_pose_detector import (
+from src.detectors.yolo_pose_detector import (
     COCO_POSE_KEYPOINTS,
     YoloPoseDetector,
 )

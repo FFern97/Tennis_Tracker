@@ -2,11 +2,11 @@
 import pytest
 import numpy as np
 
-from pipeline.impact_utils import (
+from src.pipeline.impact_utils import (
     merge_pose_keypoints,
     try_detect_stroke,
 )
-from schema import PlayerDetection
+from src.schema import PlayerDetection
 
 
 def _player(track_id: int, x1: float, kp_fill: float = 100.0) -> PlayerDetection:

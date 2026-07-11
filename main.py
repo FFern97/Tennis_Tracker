@@ -2,13 +2,6 @@
 Punto de entrada del sistema de tracking de tenis.
 Orquestador: inferencia (Pilar A), cinemática/impacto (Pilar B), persistencia Parquet/Supabase (Pilar C).
 """
-import sys
-from pathlib import Path
-
-_SRC = Path(__file__).resolve().parent / "src"
-if _SRC.is_dir():
-    sys.path.insert(0, str(_SRC))
-
 import os
 import pickle
 import shutil
@@ -22,9 +15,9 @@ import torch
 
 import config
 from src.core.interfaces import BaseDetector, BaseTracker
-from data.logger import SupabaseLogger
-from detectors.yolo_pose_detector import YoloPoseDetector
-from pipeline.impact_utils import (
+from src.data.logger import SupabaseLogger
+from src.detectors.yolo_pose_detector import YoloPoseDetector
+from src.pipeline.impact_utils import (
     framedata_row,
     merge_pose_keypoints,
     snapshot_framedata,
@@ -35,7 +28,7 @@ from src.vision_tracking.court_detector import CourtDetector
 from src.vision_tracking.inference import YoloDetector
 from src.trackers.ball_tracker import BallTracker
 from src.trackers.player_tracker import PlayerTracker
-from schema import FrameData, BallInfo, PlayersInfo
+from src.schema import FrameData, BallInfo, PlayersInfo
 from src.visualization.visualization import render
 
 

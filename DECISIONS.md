@@ -52,3 +52,22 @@ sin uso en el pipeline consolidado. Reemplazados funcionalmente por `main.py` (e
 **Impacto**: Sin impacto en tests ni cobertura (ambos en `omit` de `.coveragerc`;
 TOTAL permanece 88.16%). Referencias documentales en specs/ y `features.yaml` se
 actualizan en T014.
+
+## 2026-07-10 — T012/T013/T014: Golden master unpickler + __init__ cleanup
+
+**Contexto**: La migración a full-path imports (T013) rompió la deserialización de
+los stubs .pkl del golden master, que serializan clases como `schema.Detection`
+(módulo bare, ya inexistente tras reducir pythonpath a `.` en T012).
+
+**Decisión**: (a) `_StubUnpickler` en test_golden_master.py remapea `schema.*` →
+`src.schema.*` en deserialización, sin regenerar los pickles. (b) Vaciado de
+`src/detectors/__init__.py` (re-export muerto de YoloPoseDetector, 0 callers vía
+`from src.detectors import`).
+
+**Justificación**: (a) Regenerar los stubs habría rebaseline-ado el golden master
+a la salida del código actual, destruyendo la señal de regresión; el remapeo de
+módulo preserva las referencias originales intactas. (b) US-7 y MUST 7 exigen
+`__init__.py` bajo `src/` vacíos sin re-exports; el re-export no tenía callers.
+
+**Impacto**: Golden master sigue [OK] PASSED contra stubs originales. Cobertura
+TOTAL sin movimiento (88.16%). 0 hits de `from src.detectors import` post-cleanup.

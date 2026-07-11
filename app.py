@@ -1,14 +1,9 @@
 import streamlit as st
 import os
-import sys
 import pandas as pd
 import io
 import contextlib
-from pathlib import Path
 from datetime import datetime, timezone
-
-# Asegurar visibilidad de módulos
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import config
 from main import main as run_pipeline

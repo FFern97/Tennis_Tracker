@@ -5,7 +5,7 @@ import pytest
 
 import numpy as np
 
-from analytics.kinematics import (
+from src.analytics.kinematics import (
     calculate_angle,
     calculate_velocity,
     classify_side,
@@ -13,7 +13,7 @@ from analytics.kinematics import (
     detect_impact_candidate,
     get_distance,
 )
-from schema import Detection
+from src.schema import Detection
 
 
 def test_calculate_angle_right_angle():

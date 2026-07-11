@@ -2,6 +2,7 @@
 
 > Generado por /sdd-scan el 2026-06-27
 > Commit base: 85b1e8e
+> Actualizado post-refactor slice 4 (2026-07-10)
 > Este archivo es DESCRIPTIVO (qué hay), no PRESCRIPTIVO (qué debería haber).
 > Las restricciones acá son no negociables salvo decisión registrada en DECISIONS.md.
 
@@ -13,24 +14,25 @@
 - Gestor de paquetes: pip (`requirements.txt`)
 
 ## source_root
-Layout híbrido definitivo — no hay paquete instalable único:
-- **Raíz del repo**: orquestación, config, inferencia modular (`inference.py`, `core/`, `trackers/`, `court_detector.py`, `geometry_utils.py`, `visualization*.py`)
-- **`src/`**: pilares B/C — `schema.py`, `analytics/`, `pipeline/`, `data/`, `detectors/`
-- `main.py` y `app.py` insertan `src/` en `sys.path` al arrancar
+Layout unificado bajo `src/` — imports full-path (`from src.<paquete>.<módulo> import …`):
+- **Raíz del repo**: entry points (`main.py`, `app.py`), `config.py`, tests y artefactos SDD
+- **`src/`**: todo el código de dominio — `schema.py`, `core/`, `vision_tracking/`, `trackers/`, `visualization/`, `analytics/`, `pipeline/`, `data/`, `detectors/`
+- Sin `sys.path.insert` en producción; resolución vía paquete `src` con `pythonpath = .` en pytest
 
 ## Estructura
 ```
 Tennis/
 ├── main.py, app.py, config.py
-├── core/interfaces.py
-├── inference.py, court_detector.py, geometry_utils.py, tracknet.py
-├── trackers/
 ├── src/
 │   ├── schema.py
-│   ├── detectors/yolo_pose_detector.py
+│   ├── core/interfaces.py
+│   ├── vision_tracking/   (inference, court_detector, geometry_utils, tracknet)
+│   ├── trackers/          (ball_tracker, player_tracker)
+│   ├── visualization/     (visualization, visualization_utils)
 │   ├── analytics/kinematics.py
 │   ├── pipeline/impact_utils.py
-│   └── data/logger.py
+│   ├── data/logger.py
+│   └── detectors/yolo_pose_detector.py
 ├── tests/
 ├── models/          # .pt (gitignored)
 ├── data/videos/     # entrada (gitignored *.mp4)
@@ -46,18 +48,18 @@ Tennis/
 - Datos entre módulos via dataclasses en `src/schema.py`
 - Fallos de Supabase no tumbar el pipeline: `SupabaseLogger` devuelve `None` y loguea
 - Golden master: stubs `.pkl` en `stubs/<video_key>/`; `OVERWRITE_STUBS=False` preserva referencias
-- `PlayerTracker` es canónica; `PersonTracker` es alias de compatibilidad
+- `PlayerTracker` es la clase canónica de tracking de jugadores
 - `HITL_REVIEWER_NAME` en `app.py` es revisor único fijo (no placeholder); multi-usuario requiere entrada en `DECISIONS.md`
-- Cobertura pytest-cov omite scripts legacy y glue — ver `.coveragerc`
+- Cobertura pytest-cov omite glue y módulos de inferencia pesada — ver `.coveragerc`
 
-## Scripts legacy
-- `tennis_tracker.py` y `yolo_person_detector.py` están presentes como histórico
-- **Restricción SDD**: comandos futuros no los modifican salvo decisión explícita en `DECISIONS.md`
-- Entry point activo: `main.py` (CLI) y `app.py` (Streamlit)
+## Entry points
+- **CLI**: `main.py` — pipeline completo de tracking
+- **UI**: `app.py` — Streamlit (ingesta + auditoría HITL)
+- Scripts legacy `tennis_tracker.py` / `yolo_person_detector.py` eliminados (T011, ver `DECISIONS.md`)
 
 ## Tests
 - Framework: pytest ≥8, pytest-cov
-- Ubicación: `tests/`; `pythonpath = src` en `pytest.ini`
+- Ubicación: `tests/`; `pythonpath = .` en `pytest.ini`
 - Comando: `pytest` (reporte terminal + `htmlcov/`)
 - Golden master: `python tests/test_golden_master.py`
 - Smoke Supabase: `smoke_test_supabase.py` (manual, requiere `.env`)

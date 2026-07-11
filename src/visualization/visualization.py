@@ -4,7 +4,7 @@ Punto de entrada único para dibujar frame: court, ball, players y minimap.
 import cv2
 import numpy as np
 
-from schema import BallInfo, PlayersInfo
+from src.schema import BallInfo, PlayersInfo
 from src.visualization.visualization_utils import (
     draw_keypoints,
     draw_players_from_info,

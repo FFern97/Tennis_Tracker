@@ -6,7 +6,7 @@ src_path = str(Path(__file__).parent / "src")
 if src_path not in sys.path:
     sys.path.append(src_path)
 
-from data.logger import SupabaseLogger
+from src.data.logger import SupabaseLogger
 
 def test_live_connection():
     print("🚀 Iniciando prueba de conexión con Supabase...")

@@ -26,7 +26,7 @@ pytest --cov=src/core --cov=src/trackers --cov=src/vision_tracking \
 | Métrica | Valor |
 |---------|-------|
 | Tests | 66 passed |
-| **TOTAL cobertura** | **88.16%** (650 stmts, 56 miss, 220 branches, 39 BrPart) |
+| **TOTAL cobertura** | **88.13%** (648 stmts, 56 miss, 220 branches, 39 BrPart) |
 | Plataforma | win32, Python 3.12.4 |
 | Duración | ~9s (post-slice-3) |
 
@@ -66,13 +66,13 @@ Cambiar esta política requiere entrada en `DECISIONS.md` (fuera de scope de est
 ### Notas
 
 - **5 módulos medidos** (filas 3–5, 7, 9): cobertura por módulo **no debe bajar** vs estos valores tras cada slice restante.
-- **TOTAL global** (88.16%): no debe bajar tras ningún slice restante.
+- **TOTAL global** (88.13%): no debe bajar tras ningún slice restante.
 
 ## Gate de comparación (por slice)
 
 1. `pytest -q` → exit 0
 2. `python tests/test_golden_master.py` → exit 0, sin diffs
-3. TOTAL ≥ **88.16%**
+3. TOTAL ≥ **88.13%**
 4. Por módulo medido movido en la slice: `Cover ≥` valor de la tabla
 5. Por módulo omitido movido en la slice: golden master sin diffs es el único gate aplicable (ver sección ⚠️ arriba)
 

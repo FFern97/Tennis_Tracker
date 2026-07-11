@@ -20,12 +20,10 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC = ROOT / "src"
-for _p in (SRC, ROOT):
-    if str(_p) not in sys.path:
-        sys.path.insert(0, str(_p))
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))
 
-from schema import Detection, PlayerDetection  # noqa: E402
+from src.schema import Detection, PlayerDetection  # noqa: E402
 
 # Nombres de archivo (alineados con config)
 BALL_NAME = "ball_detections.pkl"
@@ -35,9 +33,18 @@ RTOL = 1e-5
 ATOL = 1e-5
 
 
+class _StubUnpickler(pickle.Unpickler):
+    """Remapea clases serializadas como ``schema.*`` al layout post-refactor ``src.schema``."""
+
+    def find_class(self, module, name):
+        if module == "schema":
+            module = "src.schema"
+        return super().find_class(module, name)
+
+
 def load_pickle_list(path: Path) -> list:
     with open(path, "rb") as f:
-        return pickle.load(f)
+        return _StubUnpickler(f).load()
 
 
 def _float_close(a: float, b: float) -> bool:

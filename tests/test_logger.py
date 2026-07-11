@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 import pytest
 
-from data.logger import CONFIDENCE_REVIEW_THRESHOLD, SupabaseLogger
+from src.data.logger import CONFIDENCE_REVIEW_THRESHOLD, SupabaseLogger
 
 
 @pytest.fixture
@@ -182,7 +182,7 @@ def test_save_stroke_sequence_writes_parquet(tmp_path):
 def test_save_stroke_sequence_returns_false_on_error(tmp_path):
     bad_path = tmp_path / "nope" / "\x00bad"  # inválido en muchos SO; usar mock
 
-    with patch("data.logger.pd.DataFrame", side_effect=ValueError("bad data")):
+    with patch("src.data.logger.pd.DataFrame", side_effect=ValueError("bad data")):
         ok = SupabaseLogger.save_stroke_sequence([], tmp_path / "a.parquet")
         assert ok is False
 
@@ -192,7 +192,7 @@ def test_init_lazy_client_uses_env(monkeypatch):
     monkeypatch.setenv("SUPABASE_URL", "https://x.supabase.co")
     monkeypatch.setenv("SUPABASE_KEY", "key")
 
-    with patch("data.logger._load_supabase_client", return_value=fake) as loader:
+    with patch("src.data.logger._load_supabase_client", return_value=fake) as loader:
         log = SupabaseLogger()
         assert log.client is fake
         loader.assert_called_once_with("https://x.supabase.co", "key")
@@ -201,7 +201,7 @@ def test_init_lazy_client_uses_env(monkeypatch):
 def test_init_client_creation_failure(monkeypatch):
     monkeypatch.setenv("SUPABASE_URL", "https://x.supabase.co")
     monkeypatch.setenv("SUPABASE_KEY", "key")
-    with patch("data.logger._load_supabase_client", side_effect=ConnectionError("wifi")):
+    with patch("src.data.logger._load_supabase_client", side_effect=ConnectionError("wifi")):
         log = SupabaseLogger()
         assert log.client is None
 

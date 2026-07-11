@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 
 import config
-from schema import PlayerDetection, PlayersInfo
+from src.schema import PlayerDetection, PlayersInfo
 from src.trackers.player_tracker import PlayerTracker
 
 
