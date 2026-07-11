@@ -34,6 +34,8 @@ Tennis/
 │   ├── data/logger.py
 │   └── detectors/yolo_pose_detector.py
 ├── tests/
+│   ├── smoke/       # smoke tests manuales (Supabase, requiere .env)
+│   └── fixtures/court_images/  # PNG de canchas para court detection (~8 MB en git)
 ├── models/          # .pt (gitignored)
 ├── data/videos/     # entrada (gitignored *.mp4)
 ├── static/output_videos/
@@ -62,7 +64,8 @@ Tennis/
 - Ubicación: `tests/`; `pythonpath = .` en `pytest.ini`
 - Comando: `pytest` (reporte terminal + `htmlcov/`)
 - Golden master: `python tests/test_golden_master.py`
-- Smoke Supabase: `smoke_test_supabase.py` (manual, requiere `.env`)
+- Smoke Supabase: `tests/smoke/smoke_test_supabase.py` (manual, requiere `.env`; `python -m tests.smoke.smoke_test_supabase`)
+- Fixtures de imágenes: `tests/fixtures/court_images/` (15 PNG de canchas para desarrollo/tests de court detection; ~8 MB en git)
 
 ## Persistencia / Data
 - **Supabase** (opcional): tablas `videos`, `strokes`, `annotations`; credenciales en `.env`

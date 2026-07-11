@@ -46,3 +46,23 @@ features:
       - "2026-07-10 — Actualización de baseline de cobertura post Slice 3"
       - "2026-07-10 — T011: Eliminación de scripts legacy en raíz"
       - "2026-07-10 — T012/T013/T014: Golden master unpickler + __init__ cleanup"
+
+  - id: fix-001-housekeeping-post-001
+    type: fix
+    status: CLOSED
+    domain: data_factory
+    owner: dev
+    sprint: null
+    created: 2026-07-11
+    closed: 2026-07-11T20:50:00-03:00
+    touches:
+      - smoke_test_supabase.py
+      - tests/smoke/smoke_test_supabase.py
+      - tests/smoke/__init__.py
+      - data/images/
+      - tests/fixtures/court_images/
+      - tests/test_housekeeping_post_001.py
+      - existing-arch.md
+      - graph/domain.yaml
+      - metrics/fix-001-housekeeping-post-001-metrics.md
+    decisions: []
