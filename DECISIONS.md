@@ -69,5 +69,4 @@ a la salida del código actual, destruyendo la señal de regresión; el remapeo 
 módulo preserva las referencias originales intactas. (b) US-7 y MUST 7 exigen
 `__init__.py` bajo `src/` vacíos sin re-exports; el re-export no tenía callers.
 
-**Impacto**: Golden master sigue [OK] PASSED contra stubs originales. Cobertura
-TOTAL sin movimiento (88.16%). 0 hits de `from src.detectors import` post-cleanup.
+**Impacto**: Golden master sigue [OK] PASSED contra stubs originales. Cobertura TOTAL 88.16% → 88.13% (−2 stmts del re-export vaciado en src/detectors/__init__.py; miss=56 sin cambio — contracción de denominador, no regresión). Baseline actualizado a 88.13% en baseline-coverage.md. 0 hits de `from src.detectors import` post-cleanup.

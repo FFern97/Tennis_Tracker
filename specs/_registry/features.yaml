@@ -4,12 +4,12 @@
 features:
   - id: 001-refactor-consolidar-src
     type: feature
-    status: OPEN
+    status: CLOSED
     domain: vision_tracking
     owner: dev
     sprint: null
     created: 2026-07-01
-    closed: null
+    closed: 2026-07-11T00:56:00-03:00
     touches:
       # Crear
       - specs/001-refactor-consolidar-src/baseline-coverage.md
@@ -41,4 +41,8 @@ features:
       # Eliminar (pre)
       - tennis_tracker.py
       - yolo_person_detector.py
-    decisions: []
+    decisions:
+      - "2026-07-10 — Eliminación del alias PersonTracker"
+      - "2026-07-10 — Actualización de baseline de cobertura post Slice 3"
+      - "2026-07-10 — T011: Eliminación de scripts legacy en raíz"
+      - "2026-07-10 — T012/T013/T014: Golden master unpickler + __init__ cleanup"
