@@ -70,3 +70,33 @@ módulo preserva las referencias originales intactas. (b) US-7 y MUST 7 exigen
 `__init__.py` bajo `src/` vacíos sin re-exports; el re-export no tenía callers.
 
 **Impacto**: Golden master sigue [OK] PASSED contra stubs originales. Cobertura TOTAL 88.16% → 88.13% (−2 stmts del re-export vaciado en src/detectors/__init__.py; miss=56 sin cambio — contracción de denominador, no regresión). Baseline actualizado a 88.13% en baseline-coverage.md. 0 hits de `from src.detectors import` post-cleanup.
+
+## 2026-07-11 — No-adopción de telemetría SDD (`/sdd-metrics`)
+
+**Contexto**: El modelo SDD (`pmillanmc/sdd-model-v1.1`) incluye el comando
+`/sdd-metrics` que genera reportes canónicos con campos DX_MET_001..006
+(ciclos de autocorrección, consultas, interacciones, causa raíz de rework,
+resiliencia, token budget) más un ratio de rework calculado. La telemetría
+alimenta agregación cross-feature vía `/sdd-metrics-summary` y auditoría
+automatizada vía `sdd-audit`.
+
+**Decisión**: No adoptar la telemetría SDD en este proyecto. El archivo
+`metrics/001-refactor-consolidar-src-metrics.md` queda con las notas
+informales generadas ad-hoc durante el ciclo (`## Refine`, `## Review`),
+sin backfill canónico de `## Implement` ni `## Validate`.
+
+**Justificación**:
+- Instalación mínima del modelo (Tier 1+2): sin Node/pnpm, sin auditor
+  determinista (`sdd-audit`), sin `/sdd-metrics-summary` en un flujo real.
+  La telemetría no tiene consumidor automatizado.
+- Solo dev: no hay agregación cross-team ni comparación entre owners.
+- Retorno vs esfuerzo: backfill canónico (~30-45 min por feature) sin
+  proceso que consuma los datos = ceremonia.
+
+**Reactivación**: si el proyecto escala a equipo o se activa el auditor
+completo (Tier 3 del modelo SDD), reabrir esta decisión y backfillear
+métricas retrospectivas de features previas.
+
+**Alcance de la decisión**: aplica a todas las features futuras del
+proyecto hasta reactivación explícita. No requiere entrada nueva en
+DECISIONS.md por cada feature.
