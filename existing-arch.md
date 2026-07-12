@@ -7,11 +7,11 @@
 > Las restricciones acá son no negociables salvo decisión registrada en DECISIONS.md.
 
 ## Stack
-- Lenguaje: Python 3 (versión específica TBD por el equipo; se pinneará en próximo update)
+- Lenguaje: Python ≥ 3.11 (testeado en 3.12, pinneado en `.python-version`)
 - Framework CV: PyTorch 2.9 + Ultralytics YOLOv8 + OpenCV 4.x
 - UI: Streamlit (`app.py`, `.streamlit/config.toml`)
 - Runtime: local (venv); GPU opcional vía CUDA
-- Gestor de paquetes: pip (`requirements.txt`)
+- Gestor de paquetes: pip; `requirements.txt` (runtime) + `requirements-dev.txt` (tests/dev, incluye runtime vía `-r`)
 
 ## source_root
 Layout unificado bajo `src/` — imports full-path (`from src.<paquete>.<módulo> import …`):

@@ -66,3 +66,21 @@ features:
       - graph/domain.yaml
       - metrics/fix-001-housekeeping-post-001-metrics.md
     decisions: []
+
+  - id: fix-002-housekeeping-tanda-2
+    type: fix
+    status: CLOSED
+    domain: orchestration
+    owner: dev
+    sprint: null
+    created: 2026-07-11
+    closed: 2026-07-11T21:30:00-03:00
+    touches:
+      - .python-version
+      - requirements.txt
+      - requirements-dev.txt
+      - existing-arch.md
+      - README.md
+      - tests/test_housekeeping_post_001.py
+      - metrics/fix-002-housekeeping-tanda-2-metrics.md
+    decisions: []

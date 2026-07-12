@@ -46,13 +46,19 @@ source .venv/bin/activate
 
 Se instala el stack necesario (PyTorch, OpenCV, Ultralytics/YOLO).
 
-**Instalar vía requirements**
+**Solo ejecución (runtime)**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-`pip` es el gestor de paquetes de Python; `-r` indica que lea la lista desde el archivo.
+**Desarrollo (incluye tests)**
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+`pip` es el gestor de paquetes de Python; `-r` indica que lea la lista desde el archivo. `requirements-dev.txt` incluye runtime vía `-r requirements.txt`.
 
 ---
 
